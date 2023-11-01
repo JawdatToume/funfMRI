@@ -17,12 +17,15 @@ def main():
 
     x_train = fmridata[:][:][:40]
     x_test = fmridata[:][:][40:]
-    y_train = h5py.File("Subject1.h5", 'r')
-    y_train = np.array(y_train["dataset"][:])
-    y_test = torch.load(os.path.join("convnext_train", "01518878_5958.pt"))
-    regress(x_train, y_train, x_test, y_test)
+    #y_train = h5py.File("Subject1.h5", 'r') 
+    #y_train = np.array(y_train["dataset"][:])
+    y_train = torch.load(os.path.join("convnext_train", "01518878_5958.pt"))
+    # A. open folder with pytorch so we can extract the features from the .pt files.
+    # TODO: Figure out how to identify the (technical term) thingies.
+    
+    regress(x_train, y_train, x_test)
 
-def regress(x_train, y_train, x_test, y_test):
+def regress(x_train, y_train, x_test):
     model = LinearRegression()
 
     print(x_train.shape)
