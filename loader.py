@@ -5,6 +5,7 @@ import os
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
+import pickle
 
 from nilearn import image
 
@@ -44,6 +45,7 @@ def loaderAll():
                     data = file.get_fdata()
 
                     points[subjectNo-1].append(data)
+                pickle.dump(points, filepath3.replace("\\",""))
     
     for subjectNo in range(0,5):
         currSubject = points[subjectNo]
@@ -61,13 +63,15 @@ def loaderAll():
 
 def loaderSubject(subjectNo):
     print("running loaderSubject...")
-    points = []
+    reader = open("fMRIFullData-sub-01-ses-imageryTest03-func.pkl", 'rb')
+    points = pickle.load(reader)
 
     filepath = os.path.join("fMRIFullData",os.path.join("sub-0" + str(subjectNo)))
-    for dataTypes in os.listdir(filepath)[1:]:
+    for dataTypes in os.listdir(filepath)[4:]:
         filepath2 = os.path.join(filepath, os.path.join(dataTypes, "func"))
         writefile = filepath2.replace("\\", "-")
-        writefile += '.npy'
+        writefile += '.pkl'
+        writer = open(writefile, 'wb')
         for dataMatrices in os.listdir(filepath2):
             filepath3 = os.path.join(filepath2, dataMatrices)
             if filepath3[-1] == "z":
@@ -76,17 +80,18 @@ def loaderSubject(subjectNo):
                 data = file.get_fdata()
 
                 points.append(data)
-            
+        pickle.dump(points, writer)
                 #print(data.shape)
         #np.save(writefile, points) #We are constantly getting MemoryErrors, I'm currently trying to look into making things faster through this
     complete = []
     for point in points:
         complete.extend(point.tolist())
     complete = np.array(complete)
-    norm = np.linalg.norm(complete)
+    norm_mean = np.mean(complete)
+    norm_std = np.std(complete)
 
     for point in range(len(points)):
-        points[point] /= norm
+        points[point] = (points[point] - norm_mean) / norm_std
     
     print("done")
     return points

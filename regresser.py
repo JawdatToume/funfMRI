@@ -25,7 +25,7 @@ def main():
     
     regress(x_train, y_train, x_test)
 
-def regress(x_train, y_train, x_test):
+def regress(x_train, y_train, x_test, y_test):
     model = LinearRegression()
 
     print(x_train.shape)
@@ -35,16 +35,7 @@ def regress(x_train, y_train, x_test):
 
     y_prediction = model.predict(x_test)
 
-    # y_test_list = []
-    # y_prediction_list = []
-    # for i in range(len(y_test)):
-    #     y_test_list.append(y_test[i])
-    #     y_prediction_list.append(y_prediction[i])
-    # y_test_list = np.array(y_test_list)
-    # y_prediction_list = np.array(y_prediction_list)
-    # print(np.corrcoef(y_test_list, y_prediction_list))   
-    # TODO: Calculate correlations between the images and find the one that is most matching the category :)
-    #  
+    print(np.corrcoef(y_test, y_prediction))
 
 if __name__ == "__main__":
     main()
