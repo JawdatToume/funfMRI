@@ -10,13 +10,17 @@ import pickle
 from nilearn import image
 
 # i wanna make this prettier and more versatile eventually but I at least got fmri stuff opened os that;s good!!
+# is prettier and more versatile tbh i liek this file
 
 '''Instructions for running:
-    loader: normalizes and gets data for all subjects (don't do this lol)
+    loaderAll: normalizes and gets data for all subjects (don't do this lol)
     loaderSubject(subjectNo): normalizes and gets data for the subject (1 <= subjectNo <= 5)
     loaderSpecific(subjectNo, dataType, dataNo, testNo): gets the specific matrix from the specified subject, dataType (0 = imageryTest, 1 = perceptionTest, 2 = perceptionTraining), data number, and test number to give one matrix
     
-    Note: if running in command line, it just takes the one with the most number of parameters that could be accounted for (if you input 0 inputs-> loaderAll() (can also be run with loader.py all), 1-3 inputs -> loaderSubject(sys.argv[1]), 4+ -> loaderSpecific(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]))'''
+    Note: if running in command line, it just takes the one with the most number of parameters that could be accounted for:
+        0 inputs -> loaderAll() (can also be run with loader.py all), 
+        1-3 inputs -> loaderSubject(sys.argv[1]),
+        4+ -> loaderSpecific(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])'''
 
 #https://brainiak.org/tutorials/02-data-handling/
 def main():
@@ -83,6 +87,7 @@ def loaderSubject(subjectNo):
         pickle.dump(points, writer)
                 #print(data.shape)
         #np.save(writefile, points) #We are constantly getting MemoryErrors, I'm currently trying to look into making things faster through this
+
     complete = []
     for point in points:
         complete.extend(point.tolist())
