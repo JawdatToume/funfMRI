@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import masker
 import torch
+
+# https://github.com/KamitaniLab/slir
+from slir import SparseLinearRegression
 from sklearn.linear_model import LinearRegression
 import h5py
 
@@ -23,19 +26,21 @@ def main():
     # A. open folder with pytorch so we can extract the features from the .pt files.
     # TODO: Figure out how to identify the (technical term) thingies.
     
-    regress(x_train, y_train, x_test)
+    regress(np.random.random((1000,1)), np.random.random((1000,5)), np.random.random((1000,1)), np.random.random((1000,5)))
 
-def regress(x_train, y_train, x_test, y_test):
-    model = LinearRegression()
-
-    print(x_train.shape)
-    print(y_train.shape)
+def regress(flattened_data, feature_vector, test_data, result):
+    linregs = []
+    for i in range(len(feature_vector)):
+        linregs.append(SparseLinearRegression(n_iter=100))
+        linregs[i].fit(flattened_data.T, feature_vector[i][:].reshape(1, feature_vector.shape[1]))
     
-    model.fit(x_train, y_train)
-
-    y_prediction = model.predict(x_test)
-
-    print(np.corrcoef(y_test, y_prediction))
+    predicted_features = []
+    for regressor in linregs:
+        predicted_features.append(regressor.predict(test_data.T)[0])
+    predicted_features = np.array(predicted_features)
+    print(result)
+    print(predicted_features)
+    print(np.corrcoef(result.reshape(result.shape[0],), predicted_features))
 
 if __name__ == "__main__":
     main()
