@@ -34,7 +34,7 @@ def main():
     # y_train = torch.load(os.path.join("convnext_train", "01518878_5958.pt"))
     # A. open folder with pytorch so we can extract the features from the .pt files.
     # TODO: Figure out how to identify the (technical term) thingies.
-    if(len(sys.argv) > 0):
+    if(len(sys.argv) > 1):
         regress(np.random.random(sys.argv[0], sys.argv[1], sys.argv[2], sys.argv[3]))
     else:
         regress(np.random.random((1000,1)), np.random.random((1000,1)), np.random.random((1000,1)), np.random.random((1000,1)))
