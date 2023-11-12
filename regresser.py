@@ -17,7 +17,9 @@ import h5py
 regress(x_train, y_train, x_test, y_test)
 You can call regress separately or use the command line 
 ./regress.py x_train y_train x_test y_test
-If you don't input anything it just assumes 4 random 1000 x 1 matrices'''
+If you don't input anything it just assumes 4 random 1000 x 1 matrices
+
+returns the linear regressors and the correlation coefficient'''
 
 def main():
 
@@ -47,9 +49,10 @@ def regress(flattened_data, feature_vector, test_data, result):
     for regressor in linregs:
         predicted_features.append(regressor.predict(test_data.T)[0])
     predicted_features = np.array(predicted_features)
-    print(result)
-    print(predicted_features)
-    print(np.corrcoef(result.reshape(result.shape[0],), predicted_features))
+    
+    correlation = np.corrcoef(result.reshape(result.shape[0],), predicted_features)
+
+    return linregs, correlation
 
 if __name__ == "__main__":
     main()
