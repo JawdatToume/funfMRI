@@ -3,3 +3,4 @@
 .idea/
 __pycache__/masker.cpython-38.pyc
 .DS_Store
+/convnext_train/
