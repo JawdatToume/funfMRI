@@ -23,7 +23,7 @@ returns the linear regressors and the correlation coefficient'''
 class regressor:
     def fit(self, flattened_data, feature_vector):
         self.linregs = []
-        for i in range(len(feature_vector)):
+        for i in range(feature_vector.shape[1]):
             self.linregs.append(SparseLinearRegression(n_iter=100))
             print(feature_vector[i,:].shape)
             self.linregs[i].fit(flattened_data, feature_vector[:,i])
@@ -36,7 +36,7 @@ class regressor:
 
         return predicted_features 
 
-    def evaluate(self, predicted_features, result):
+    def evaluate(self, predicted_features, actual_value):
         correlation = np.corrcoef(result.reshape(result.shape[0],), predicted_features)
 
         return correlation
