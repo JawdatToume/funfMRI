@@ -31,7 +31,7 @@ class regressor:
     def predict(self, test_data):
         predicted_features = []
         for regressor in self.linregs:
-            predicted_features.append(regressor.predict(test_data.T)[0])
+            predicted_features.append(regressor.predict(test_data)[0])
         predicted_features = np.array(predicted_features)
 
         return predicted_features 
