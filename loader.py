@@ -112,12 +112,17 @@ def loaderSpecific(subjectNo, dataType, dataNo, testNo):
     else:
         testType = "perceptionTraining"
         testType2 = "perception"
+    # print(f"{(lambda a: '0'+str(a) if a<10 else str(a))(testNo)}")
+    try:
+        filepath = os.path.join(f"/home/srinjoy/PycharmProjects/funfMRI/fMRIFullData",os.path.join("sub-0" + str(subjectNo), os.path.join("ses-"+testType+"0"+str(dataNo), os.path.join("func", "sub-0"+str(subjectNo)+"_ses-"+testType+"0"+str(dataNo)+"_task-"+testType2+"_run-"+f"{(lambda a: '0'+str(a) if a<10 else str(a))(testNo)}"+"_bold.nii.gz"))))
+        # print(filepath)
+        file = nib.load(filepath)
 
-    filepath = os.path.join("fMRIFullData",os.path.join("sub-0" + str(subjectNo), os.path.join("ses-"+testType+"0"+str(dataNo), os.path.join("func", "sub-0"+str(subjectNo)+"_ses-"+testType+"0"+str(dataNo)+"_task-"+testType2+"_run-0"+str(testNo)+"_bold.nii.gz"))))
-
-    file = nib.load(filepath)
-
-    data = file.get_fdata()
+        data = file.get_fdata()
+        print("done")
+    except:
+        print("Either Loading of all the sessions completed or some error in the try block ")
+        return "FIN"
     # print(data)
 
     # #fig, axes = plt.subplots(1,3, figsize=(15,35))
@@ -127,7 +132,7 @@ def loaderSpecific(subjectNo, dataType, dataNo, testNo):
     # plt.show()#axes[0].set_title("Saggital")
     # plt.imshow(data[:,:,2])#.T, cmap='gray', origin='lower') # Saggital
     # plt.show()#axes[0].set_title("Saggital")
-    print("done")
+
     return data
 
     #plotting.plot_matrix(data)

@@ -8,7 +8,7 @@ import numpy as np
 import masker
 import torch
 
-# https://github.com/KamitaniLab/slir
+# https://gi    thub.com/KamitaniLab/slir
 from slir import SparseLinearRegression
 from sklearn.linear_model import LinearRegression
 import h5py
