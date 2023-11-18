@@ -7,3 +7,12 @@ __pycache__/masker.cpython-38.pyc
 /kamitani_lab_code/
 /Imagenet Kamitani Subset Data/
 __pycache__/
+<<<<<<< Updated upstream
+/demo_slir.py
+/demo_slir_compare.py
+/img_features_cnn/
+=======
+/img_features_cnn/
+/demo_slir_compare.py
+/demo_slir.py
+>>>>>>> Stashed changes

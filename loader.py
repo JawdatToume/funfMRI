@@ -114,7 +114,7 @@ def loaderSpecific(subjectNo, dataType, dataNo, testNo):
         testType2 = "perception"
     # print(f"{(lambda a: '0'+str(a) if a<10 else str(a))(testNo)}")
     try:
-        filepath = os.path.join(f"/home/srinjoy/PycharmProjects/funfMRI/fMRIFullData",os.path.join("sub-0" + str(subjectNo), os.path.join("ses-"+testType+"0"+str(dataNo), os.path.join("func", "sub-0"+str(subjectNo)+"_ses-"+testType+"0"+str(dataNo)+"_task-"+testType2+"_run-"+f"{(lambda a: '0'+str(a) if a<10 else str(a))(testNo)}"+"_bold.nii.gz"))))
+        filepath = os.path.join(f"./fMRIFullData",os.path.join("sub-0" + str(subjectNo), os.path.join("ses-"+testType+"0"+str(dataNo), os.path.join("func", "sub-0"+str(subjectNo)+"_ses-"+testType+"0"+str(dataNo)+"_task-"+testType2+"_run-"+f"{(lambda a: '0'+str(a) if a<10 else str(a))(testNo)}"+"_bold.nii.gz"))))
         # print(filepath)
         file = nib.load(filepath)
 

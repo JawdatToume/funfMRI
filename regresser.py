@@ -20,12 +20,13 @@ You can call regress separately or use the command line
 If you don't input anything it just assumes 4 random 1000 x 1 matrices
 
 returns the linear regressors and the correlation coefficient'''
-class regressor:
+class Regressor:
     def fit(self, flattened_data, feature_vector):
         self.linregs = []
         for i in range(feature_vector.shape[1]):
             self.linregs.append(SparseLinearRegression(n_iter=100))
-            print(feature_vector[i,:].shape)
+            print(flattened_data.shape,feature_vector[i,:].shape)
+            #
             self.linregs[i].fit(flattened_data, feature_vector[:,i])
     
     def predict(self, test_data):
