@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import masker
 import torch
+import pickle
 
 # https://gi    thub.com/KamitaniLab/slir
 from slir import SparseLinearRegression
@@ -20,14 +21,21 @@ You can call regress separately or use the command line
 If you don't input anything it just assumes 4 random 1000 x 1 matrices
 
 returns the linear regressors and the correlation coefficient'''
-class Regressor:
+
+class regressor:
+    def __init__(self):
+        self.linregs = []
+
     def fit(self, flattened_data, feature_vector):
         self.linregs = []
         for i in range(feature_vector.shape[1]):
-            self.linregs.append(SparseLinearRegression(n_iter=100))
-            print(flattened_data.shape,feature_vector[i,:].shape)
-            #
+            if(len(self.linregs) <= i):
+                self.linregs.append(SparseLinearRegression(n_iter=100))
+            print(feature_vector[:,i].shape)
             self.linregs[i].fit(flattened_data, feature_vector[:,i])
+
+    def save(self, path):
+        pickle.dump(self.linregs, path)
     
     def predict(self, test_data):
         predicted_features = []
@@ -42,7 +50,7 @@ class Regressor:
 
         return correlation
 
-# def main():
+def main():
 
 #     # fmridata = masker.maskSubject(1)
 #     # #h5py.File("Subject1_ImageNetTraining.h5", 'r')
@@ -55,11 +63,11 @@ class Regressor:
 #     # y_train = torch.load(os.path.join("convnext_train", "01518878_5958.pt"))
 #     # A. open folder with pytorch so we can extract the features from the .pt files.
 #     # TODO: Figure out how to identify the (technical term) thingies.
-#     if(len(sys.argv) > 1):
-#         regress(np.random.random(sys.argv[0], sys.argv[1], sys.argv[2], sys.argv[3]))
-#     else:
-#         regress(np.random.random((1000,1)), np.random.random((1000,5)), np.random.random((1000,1)), np.random.random((1000,5)))
+    object = regressor()
+    object.fit(np.random.random((1000,1)), np.random.random((1000,5)))
+    features = object.predict(np.random.random((1000,1)))
+    corrmat = object.evaluate(features, np.random.random((1000,5)))
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
