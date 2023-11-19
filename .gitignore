@@ -18,3 +18,5 @@ __pycache__/
 >>>>>>> Stashed changes
 /cnn_feature_convnext_and_alexnet/
 /imagenet_kamitani_subset/
+/sub_wise_lin_reg_data/
+/srinjoy_regression_meta_data.txt
