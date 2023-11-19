@@ -8,15 +8,19 @@ TODO: Create batches of fMRI vectors(Input data) and 1 value of CNN feature vect
 TODO : train the model over all the features to be trained for
 
 """
-import torch
-import numpy as np
 import pickle
-#import fMRITDA
-import masker, loader
+import datetime
+import os
+import re
+
+import numpy as np
 import pandas as pd
-import re,os
-import regresser
-import slir
+import torch
+
+import loader
+import masker
+
+
 def trimFlatten(data, mask, nTime):
     # return the dataset flattened without the mask
     d1, d2, d3, tPoints = data.shape
@@ -30,15 +34,31 @@ def trimFlatten(data, mask, nTime):
 
     return flatData
 
-def trainLinReg(fileType="perceptionTest",train_img_features_cnn_pth = "./img_features_cnn/alexnet_dict_train.pt",test_img_features_cnn_pth="./img_features_cnn/alexnet_dict_test.pt"):
-    for subj in range(1, 6): # Looping through all the subjects
+
+def trainLinReg(fileType="perceptionTest", train_img_features_cnn_pth="/home/srinjoy/PycharmProjects/funfMRI/img_features_cnn/convnext_features_train.pt",
+                test_img_features_cnn_pth="/home/srinjoy/PycharmProjects/funfMRI/img_features_cnn/convnext_features_test.pt"):
+    f = open("/home/srinjoy/PycharmProjects/funfMRI/srinjoy_regression_meta_data.txt", "w")
+    print(
+        f"##################RUN of train_regressor_on_fmri_to_predict_cnn_features at time: {datetime.datetime.now()}",
+        "####################",
+        file=f)
+
+    count = 0
+    for subj in range(1, 6):  # Looping through all the subjects
         # get the number of runs
+
         mask_VC = masker.maskSubject(subj, "VC")
         fileMatches = [int(f[-2:]) for f in os.listdir("./fMRIFullData/sub-0" + str(subj) + "/")
                        if re.match("ses-" + fileType + "*", f)]
         runNum = max(fileMatches)
         train_img_features_cnn = torch.load(train_img_features_cnn_pth)
         test_img_features_cnn = torch.load(test_img_features_cnn_pth)
+
+        print("For Subject Number:\t", subj, file=f)
+
+
+        train_x_y_pairs_list = list()
+        test_x_y_pairs_list= list()
         for run in range(1, runNum + 1):
             # get the number of trials
             fileMatches = [int(f[-14:-12]) for f in
@@ -51,23 +71,23 @@ def trainLinReg(fileType="perceptionTest",train_img_features_cnn_pth = "./img_fe
             trialNum = max(fileMatches)
 
             # print(fileMatches)
-            # print(runNum)
+            print("\t Runnum for train:\t", runNum, file=f)
             # print(trialNum)
             for trial in range(1, trialNum + 1):
-                # set-up a pickle string
+                #set-up a pickle string
+                print("\t \t Trial Number :\t", trialNum, file=f)
                 pickleString = ("subject_" + str(subj) + "_" + fileType + "_run_" + str(run) + "_trial_" + str(trial) +
-                                "_VC.pickle")
-                print("Running ", pickleString)
+                                "_VC.pickle",)
+                print("\t \t Running ", pickleString, file=f)
 
                 # read and convert the given nii.gz file with mask passing in the events as labels
                 # open data
                 data = loader.loaderSpecific(subj, 2, run, trial)
 
                 if isinstance(data, str):
-                    print("No file available (Not an error)")
+                    print("\t \t No file available (Not an error)", file=f)
                     continue
 
-                print("Trial Num: ",trial)
                 # cutoff the first few timepoints that are only rest, same with the last few
                 data = data[:, :, :, 10:(data.shape[3] - 3)]
                 # fit rips and object with labels for class
@@ -81,100 +101,124 @@ def trainLinReg(fileType="perceptionTest",train_img_features_cnn_pth = "./img_fe
                 TODO: use the fMRI data received and event file to find the feature and fmri pair 
                 TODO 
                 You need to: 
-                1. Open and mask the VC, this can be done by using Jawdat's loader to load specific areas and my masker; 
-                2. Remove any data that gets masked out, this is done on line 45 and 49 of fMRITDA; 
-                3. Flatten the data, again this is done on line 49; 
-                4. Train sparse linear models to predict feature values using this flattened data, this is just done using the code Jawdat gave (provided it works) the main issue is in joining the event files for image labels but that was given to you. 
-                5. Testing will be done on perceptionTest and imageryTest data (I should ask you where the imagery features are for the CNN). This is to say that training is done on perceptionTraining data. 
+                1.  Open and mask the VC, this can be done by using Jawdat's loader to load specific areas and my masker 
+                2.  Remove any data that gets masked out, this is done on line 45 and 49 of fMRITDA; 
+                3.  Flatten the data, again this is done on line 49; 
+                4.  Train sparse linear models to predict feature values using this flattened data, 
+                    this is just done using the code Jawdat gave (provided it works) the main issue is in joining 
+                    the event files for image labels but that was given to you. 
+                5.  Testing will be done on perceptionTest and imageryTest data 
+                    (I should ask you where the imagery features are for the CNN). 
+                    This is to say that training is done on perceptionTraining data. 
                 6. Store the results ideally in a csv or tsv the columns should be organized as 
-                                        stimulus label (image id or category), 
-                                        run, 
-                                        trial (two numbers that separate the fMRI files run=folder, trial=file num), 
-                                        method (in your case newCNN but for mine TDA, and Jawdat would be avgROI), 
-                                        layer label (which layer of the CNN is being predicted), 
-                                        CNN (name just in case don't wanna mix up the two CNNs), 
-                                        1-1000 predictions (all 1000 predicted features the reason I propose this is because we can always get correlations from predicted features but we can't do the opposite so this is a just in case).
+                            stimulus label (image id or category), 
+                            run, 
+                            rial (two numbers that separate the fMRI files run=folder, trial=file num), 
+                            method (in your case newCNN but for mine TDA, and Jawdat would be avgROI), 
+                            layer label (which layer of the CNN is being predicted), 
+                            CNN (name just in case don't wanna mix up the two CNNs), 
+                            1-1000 predictions 
+                            (all 1000 predicted features the reason I propose this is because we can always get 
+                            correlations from predicted features but we can't do the opposite so this is a just in case)
                 """
                 # print("Shape of the fMRI voxel data: ",data.shape)
                 # print("########EVENTS FILE FOR THE DATA###########")
 
-                events["stimulus_name"]= events["image_file"].str[:-5]
+                events["stimulus_name"] = events["image_file"].str[:-5]
 
-                #data = data
+                # data = data
                 labels = np.array(events['stimulus_name'][1:(events['stimulus_name'].shape[0] - 1)])
-                mask= mask_VC
-                nTime= 3
+                mask = mask_VC
+                nTime = 3
 
                 events.drop(events.tail(1).index, inplace=True)
                 events.drop(events.head(1).index, inplace=True)
                 # print(data.shape)
                 # print(events)
+
                 for index, row in events.iterrows():
 
                     image_stimulus = row["stimulus_name"][1:]
-                    fmri_time_start=int(row['onset']/3)-11
-                    fmri_time_end=int((row['onset']+9)/3)-11
+
+                    fmri_time_start = int(row['onset'] / 3) - 11
+                    fmri_time_end = int((row['onset'] + 9) / 3) - 11
                     #print(fmri_time_start,fmri_time_end)
-                    data_per_img_stimulus=data[:,:,:,fmri_time_start:fmri_time_end]
-                    flatData_per_img_stimulus= np.transpose(np.expand_dims((trimFlatten(data_per_img_stimulus, mask, nTime)).flatten("F"),1))
-                    #TODO the new flatten function might ot be working best for my data
-
-
-                    # print(image_stimulus)
+                    data_per_img_stimulus = data[:, :, :, fmri_time_start:fmri_time_end]
+                    flatData_per_img_stimulus = np.transpose(
+                        np.expand_dims((trimFlatten(data_per_img_stimulus, mask, nTime)).flatten("F"), 1))
+                    print("\t \t \t for image stimulus used:\t ", image_stimulus, file=f)
+                    #per_img_features = train_img_features_cnn[image_stimulus][0]
+                    print("\t \t \t for image stimulus used:\t ", image_stimulus)
+                    per_img_features = test_img_features_cnn[image_stimulus][0]
                     try:
+
                         per_img_features = train_img_features_cnn[image_stimulus][0]  # TRAIN IMG SHOWN
-                        train_img= True
+                        print("HELLOHELLOHELLO",per_img_features)
+                        train_x_y_pairs_list.append((flatData_per_img_stimulus,per_img_features,image_stimulus))
+                        #print("TRAIN added",(flatData_per_img_stimulus,per_img_features,image_stimulus),"to list")
                     except:
-                        per_img_features = test_img_features_cnn[image_stimulus][0] # TEST IMG SHOWN
-                        train_img=False
 
-                    #print(image_stimulus,flatData_per_img_stimulus,*per_img_features)
-                    for index,per_img_cnn_feature_name in enumerate(per_img_features.keys(include_nested=True)):
+                        per_img_features = test_img_features_cnn[image_stimulus][0]  # TEST IMG SHOWN
+                        test_x_y_pairs_list.append((flatData_per_img_stimulus, per_img_features, image_stimulus))
+                        #print("TEST added", (flatData_per_img_stimulus, per_img_features, image_stimulus), "to list")
 
-                        per_img_cnn_features_layer = per_img_features[per_img_cnn_feature_name].detach().cpu().numpy()
-                        #model=slir.SparseLinearRegression(n_iter=100)
-                        #print(flatData_per_img_stimulus[:1000][:,0].shape,per_img_cnn_features_layer.shape)
 
-                        # fit method takes X: (n_samples, n_features) to predict Y: (n_samples,1)
-                        # THE number of samples must be equal and the shape must mathc like (422, 430) (422,)
+                    # print(image_stimulus,flatData_per_img_stimulus,*per_img_features)
+                    count += 1
+        print("####################################",file=f)
+        print("####################################",file=f)
 
-                        print("X_train / X_test",flatData_per_img_stimulus.shape)
-                        print("Y_train / Y_test",per_img_cnn_features_layer.shape)
+        print(train_x_y_pairs_list,file=f)
+        #print(test_x_y_pairs_list,file=f)
+        with open(f"/home/srinjoy/PycharmProjects/funfMRI/sub_wise_lin_reg_data/{subj}_train.pkl", "wb") as train_save_f:
+            pickle.dump(train_x_y_pairs_list,train_save_f)
+
+        with open(f"/home/srinjoy/PycharmProjects/funfMRI/sub_wise_lin_reg_data/{subj}_test.pkl", "wb") as test_save_f :
+            pickle.dump(test_x_y_pairs_list, test_save_f)
+
+
+                    # for index, per_img_cnn_feature_name in enumerate(per_img_features.keys(include_nested=True)):
+                    #     print("\t \t \t \t for feature name :\t ", per_img_cnn_feature_name, file=f)
+                    #     count += 1
+                    #     per_img_cnn_features_layer = per_img_features[per_img_cnn_feature_name].detach().cpu().numpy()
+                    #     # model=slir.SparseLinearRegression(n_iter=100)
+                    #     # print(flatData_per_img_stimulus[:1000][:,0].shape,per_img_cnn_features_layer.shape)
+                    #
+                    #     # fit method takes X: (n_samples, n_features) to predict Y: (n_samples,1)
+                    #     # THE number of samples must be equal and the shape must mathc like (422, 430) (422,)
+                    #
+                    #     print("\t \t \t \t X_train / X_test:\t", flatData_per_img_stimulus.shape, file=f)
+                    #     print("\t \t \t \t Y_train / Y_test:\t", per_img_cnn_features_layer.shape, file=f)
+
 
                         # model.fit(flatData_per_img_stimulus, per_img_cnn_features_layer)
                         # predicted_data=model.predict(flatData_per_img_stimulus)
                         # print(predicted_data.shape)
-                        return
 
-                        #slir.evaluate(predicted_data,)
-
+                        # slir.evaluate(predicted_data,)
 
                 # flatData = trimFlatten(data, mask, nTime)
 
-                #print("####### LABELS :",labels)
+                # print("####### LABELS :",labels)
 
                 # with pd.option_context('display.max_rows', None, 'display.max_columns',
                 #                        None):  # more options can be specified also
                 #     print(events)
 
+                # print(img_features_cnn)
 
-                #print(img_features_cnn)
-
-                    #print(per_img_features)
-                    #print(index, row,end='\t')
-                    #print("\n")
-
+                # print(per_img_features)
+                # print(index, row,end='\t')
+                # print("\n")
 
                 # the flatdata just flattens the 4d fmri voxel data to 1d
 
-
-                #tf.setLabels(np.array(events['stimulus_name'][1:(events['stimulus_name'].shape[0] - 1)]))
+                # tf.setLabels(np.array(events['stimulus_name'][1:(events['stimulus_name'].shape[0] - 1)]))
                 # print(tf._labels)  # confirm labels are correct
+    print("###################################", count,"######################################################", file=f)
+    # TODO save the weights into a pickle file
+    f.close()
 
-
-                #TODO save the weights into a pickle file
 
 if __name__ == "__main__":
-    x=trainLinReg()
-
-
+    x = trainLinReg()
