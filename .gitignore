@@ -16,3 +16,5 @@ __pycache__/
 /demo_slir_compare.py
 /demo_slir.py
 >>>>>>> Stashed changes
+/cnn_feature_convnext_and_alexnet/
+/imagenet_kamitani_subset/
