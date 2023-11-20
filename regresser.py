@@ -31,7 +31,7 @@ class regressor:
         for i in range(feature_vector.shape[1]):
             if(len(self.linregs) <= i):
                 self.linregs.append(SparseLinearRegression(n_iter=100))
-            print(feature_vector[:,i].shape)
+            #print(feature_vector[:,i].shape)
             self.linregs[i].fit(flattened_data, feature_vector[:,i])
 
     def save(self, path):
