@@ -20,3 +20,4 @@ __pycache__/
 /imagenet_kamitani_subset/
 /sub_wise_lin_reg_data/
 /srinjoy_regression_meta_data.txt
+/subject_wise_numpy_arrays/

@@ -79,19 +79,22 @@ for data_file_pth in main_data_files:
                     per_subject_x_data = np.concatenate((per_subject_x_data, per_data_sample_x_data), axis=0)
                     per_subject_y_data = np.concatenate((per_subject_y_data, per_data_sample_y_data), axis=0)
 
+                print(f"\t \t \t ./subject_wise_numpy_arrays/{data_file_pth[:-4]}_X_data_imgused_{img_used}_data_index_{index}.npy")
+                print(f"\t \t \t \t X data array_done for file saved shape :", per_subject_x_data.shape)
+                print(f"\t \t \t./subject_wise_numpy_arrays/{data_file_pth[:-4]}_Y_data_imgused_{img_used}_data_index_{index}.npy")
+                print(f"\t \t \t \t Y data array_done for file saved shape :", per_subject_y_data.shape)
+
+                with open(f"./subject_wise_numpy_arrays/{data_file_pth[:-4]}_X_data_imgused_{img_used}_data_index_{index}.npy","wb") as f_numpy_X_data:
+                    np.save(f_numpy_X_data,per_data_sample_x_data)
+                with open(f"./subject_wise_numpy_arrays/{data_file_pth[:-4]}_Y_data_imgused_{img_used}_data_index_{index}.npy","wb") as f_numpy_Y_data:
+                    np.save(f_numpy_Y_data,per_data_sample_y_data)
+            # TODO Fix the last part of this code it has a memory overload before i can run it
+            # THE SAVE ORDER IS SUBJECT_[TRAIN_OR_TEST].NP INSIDE IS SUBJECT NUMBER * LAYERS OF CNN X NUMBERS OF FEATURE VALUES PREDICTED X FMRI_VECTOR_SIZE
+
         print(f"X data array_done for file {data_file_pth}:",per_subject_x_data.shape)
         print(f"Y data array_done for file {data_file_pth}:",per_subject_y_data.shape)
 
 
-                # print(f"./subject_wise_numpy_arrays/{data_file_pth[:-4]}_X_data_imgused_{img_used}_data_index_{index}.npy")
-                # print(f"./subject_wise_numpy_arrays/{data_file_pth[:-4]}_Y_data_imgused_{img_used}_data_index_{index}.npy")
-                #
-                # with open(f"./subject_wise_numpy_arrays/{data_file_pth[:-4]}_X_data_imgused_{img_used}_data_index_{index}.npy","wb") as f_numpy_X_data:
-                #     np.save(f_numpy_X_data,per_data_sample_x_data)
-                # with open(f"./subject_wise_numpy_arrays/{data_file_pth[:-4]}_Y_data_imgused_{img_used}_data_index_{index}.npy","wb") as f_numpy_Y_data:
-                #     np.save(f_numpy_Y_data,per_data_sample_y_data)
-                # TODO Fix the last part of this code it has a memory overload before i can run it
-                # THE SAVE ORDER IS SUBJECT_[TRAIN_OR_TEST].NP INSIDE IS SUBJECT NUMBER * LAYERS OF CNN X NUMBERS OF FEATURE VALUES PREDICTED X FMRI_VECTOR_SIZE
 
 
 
