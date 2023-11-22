@@ -46,7 +46,7 @@ class regressor:
         return predicted_features 
 
     def evaluate(self, predicted_features, actual_value):
-        correlation = np.corrcoef(actual_value.reshape(actual_value.shape[0],), predicted_features)
+        correlation = np.corrcoef(actual_value, predicted_features)
 
         return correlation
 
