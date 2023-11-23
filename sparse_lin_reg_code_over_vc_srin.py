@@ -1,3 +1,9 @@
+"""
+Author: Srinjoy
+Note: Deprecated please see slir_over_convnext.py for new code
+
+"""
+
 import os
 import re
 import numpy as np
