@@ -35,7 +35,9 @@ class regressor:
             self.linregs[i].fit(flattened_data, feature_vector[:,i])
 
     def save(self, path):
-        pickle.dump(self.linregs, path)
+        saver = open(path, 'wb')
+        pickle.dump(self.linregs, saver)
+        saver.close()
     
     def predict(self, test_data):
         predicted_features = []
