@@ -7,7 +7,7 @@ from sklearn import preprocessing as pre
 from slir import SparseLinearRegression
 import os
 import pickle
-
+from pathos.multiprocessing import ProcessingPool as Pool
 
 class Slir_regressor:
     def __init__(self, n_iter=200, minval=1.0e-15,
@@ -26,16 +26,16 @@ class Slir_regressor:
         self.verbose_skip = verbose_skip
 
     def fit(self, X_train, Y_train):
-        # print(X_train.shape)
-        # print(Y_train.shape)
 
-        for i in range(Y_train.shape[1]):
+        def fitData(i):
             print("For feature :", (i + 1), "out of :", Y_train.shape[1])
-            if (len(self.linregs) <= i):
-                self.linregs.append(SparseLinearRegression(n_iter=self.n_iter, verbose=self.verbose))
-            # print("X train: ",X_train.shape,"y_train: ",Y_train[:,i].shape)
-            self.linregs[i].fit(X_train, Y_train[:, i])
+            temp = SparseLinearRegression(n_iter=self.n_iter)
+            temp.fit(X_train, Y_train[:,i])
+            return temp
 
+
+        with Pool(40) as p:
+            self.linregs = p.map(fitData, [i for i in range(Y_train.shape[1])])
     def save(self, path):
         pickle.dump(self.linregs, path)
 
@@ -54,7 +54,7 @@ class Slir_regressor:
         return correlation
 
 
-def main(dir="/home/srinjoy/PycharmProjects/funfMRI/srinjoy_data/SUB_WISE_TRAIN_TEST_SPLIT_DATA/",
+def main(dir="/srinjoy_data/SUB_WISE_TRAIN_TEST_SPLIT_DATA/",
          train_include=[1],
          test_include=[1]):
     subs_dirs = sorted(os.listdir(dir))
@@ -67,6 +67,7 @@ def main(dir="/home/srinjoy/PycharmProjects/funfMRI/srinjoy_data/SUB_WISE_TRAIN_
         per_layer_predicted_y_test = []
         per_layer_corr_mat = []
         if sub in train_include:
+            print("For subject :", sub, "out of :", len(subjects))
             x_train_file = open(per_sub_dir + f"/subject_{sub}_train_X_for_ann.pkl", "rb")
             y_train_file = open(per_sub_dir + f"/subject_{sub}_train_Y_for_ann.pkl", "rb")
 
@@ -83,6 +84,7 @@ def main(dir="/home/srinjoy/PycharmProjects/funfMRI/srinjoy_data/SUB_WISE_TRAIN_
                 print(Y_train_per_sub_per_layer.shape)
                 per_layer_lin_reg.append(Slir_regressor(n_iter=2, verbose=True))
                 per_layer_lin_reg[layer].fit(X_train_per_sub_per_layer, Y_train_per_sub_per_layer)
+            pickle.dump(per_layer_lin_reg, open(per_sub_dir + f"/subject_{sub}_convnext_features_slir_regressor.pkl", "wb"))
             x_train_file.close()
             y_train_file.close()
 
@@ -101,13 +103,15 @@ def main(dir="/home/srinjoy/PycharmProjects/funfMRI/srinjoy_data/SUB_WISE_TRAIN_
 
                 per_layer_predicted_y_test.append(per_layer_lin_reg[layer].predict(X_test_per_sub_per_layer))
                 print("Predicted Features size: ", per_layer_predicted_y_test[layer].shape)
-                print("Actual fetures size:", Y_test_per_sub_per_layer.shape)
+                print("Actual features size:", Y_test_per_sub_per_layer.shape)
                 per_layer_corr_mat.append(per_layer_lin_reg[layer].evaluate(Y_test_per_sub_per_layer))
+            pickle.dump(per_layer_predicted_y_test, open(per_sub_dir + f"/subject_{sub}_convnext_features_slir_predicted_y_test.pkl", "wb"))
+            pickle.dump(per_layer_corr_mat, open(per_sub_dir + f"/subject_{sub}_convnext_features_slir_corr_mat.pkl", "wb"))
+            pickle.dump(Y_test_per_sub, open(per_sub_dir + f"/subject_{sub}_convnext_features_slir_actual_y_test.pkl", "wb"))
+
             x_test_file.close()
             y_test_file.close()
-        for x in per_layer_corr_mat:
-            print("For layer :", x)
-            print(per_layer_corr_mat[x])
+
 
 
 if __name__ == "__main__":
