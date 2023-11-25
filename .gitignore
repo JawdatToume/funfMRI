@@ -7,18 +7,14 @@ __pycache__/masker.cpython-38.pyc
 /kamitani_lab_code/
 /Imagenet Kamitani Subset Data/
 __pycache__/
-<<<<<<< Updated upstream
 /demo_slir.py
 /demo_slir_compare.py
 /img_features_cnn/
-=======
-/img_features_cnn/
-/demo_slir_compare.py
-/demo_slir.py
->>>>>>> Stashed changes
+/kaggle/
 /cnn_feature_convnext_and_alexnet/
+/GenericObjectDecoding-master/
 /imagenet_kamitani_subset/
 /sub_wise_lin_reg_data/
-
+/data/
 /subject_wise_numpy_arrays/
 /srinjoy_data/
