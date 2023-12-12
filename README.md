@@ -21,9 +21,24 @@ The Image features were generated using the [notebooks](https://github.com/Jawda
 
 The code in [Modified Kamitani Lab Generic Object Decoding](https://github.com/JawdatToume/funfMRI/blob/main/kamitani%20generic%20obj%20decoding_code_modified_for_convnext.zip) has been for most of the image feature prediction training and analysis of the AlexNet Image Features regenerated and ConvNext-tiny Image features.
 
+## Topological Data Analysis
 
+The notebook run_tda.ipynb contains all requirement to convert, train, and test models using TDA. The specific pieces of code used are:
 
+convertTDA(fileType="perceptionTraining") or convertTDA(fileType="perceptionTest")
+- To convert the fMRI data to objects containing rips diagrams
 
+convertAveragedTDA(fileType="perceptionTest")
+- Similar to convertTDA but will average over repeated stimulus
+- Can be called with perceptionTraining but this will not do much as the data have few repeats
 
+joinTDA([1, 2], fileType="perceptionTest", prePI=None, save=False, suffix="CORR")
+- returns a joined TDA object using the specified fileType of data for the subjects in the list ([1,2] in this case)
+- prePI is used when testing to give a previously fit persistence imager object to use
+- Save can be used to join and fit PIs in order to retain data for future use
+- Original rips diagrams are removed to save space
+
+TopologicalfMRI.getData()
+- returns labels, data as a tuple for training or testing, data will be flattened and in a matrix form
 
 
