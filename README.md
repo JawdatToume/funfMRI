@@ -39,6 +39,11 @@ joinTDA([1, 2], fileType="perceptionTest", prePI=None, save=False, suffix="CORR"
 - Original rips diagrams are removed to save space
 
 TopologicalfMRI.getData()
-- returns labels, data as a tuple for training or testing, data will be flattened and in a matrix form
+- returns data and labels as a tuple (data, labels) for training or testing, data will be flattened and in a matrix form
+
+from labeler import labelsToFeatures
+labelsToFeatures(labels, layer=22, labelType="train")
+- takes a list of labels, the layer to extract features from, and where labels come from (train or test)
+- returns the n x 1000 matrix of labels
 
 
