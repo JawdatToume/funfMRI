@@ -157,17 +157,12 @@ def trainSubject(subjectNo, trainType, layer):
             filepath3 = os.path.join(filepath2, dataMatrices)
             if filepath3[-1] == "z":
                 file = nib.load(filepath3)
-                images = pd.read_csv(filepath3[:-11]+"events.tsv", sep='\t')['image_file']
 
                 data = file.get_fdata()
-                currData = average(data, subjectNo)
-                for i in range(currData.shape[1]):
-                    datas.append(currData[:,i].tolist())
-                    try:
-                        if math.isnan(images[i//3]):
-                            continue
-                    except:
-                        featureList.append(features[keys.index(images[i//3])].tolist())
+                data = average(data, subjectNo)
+                datas.append(data.tolist())
+                featureList.append(features[currkey].tolist())
+                currkey+=1
 
                 points.append(data)
     
@@ -222,15 +217,17 @@ def testSubject(model, subjectNo, csvwrite, testtype="", layer=22):
             filepath3 = os.path.join(filepath2, dataMatrices)
             if filepath3[-1] == "z":
                 file = nib.load(filepath3)
-                images = pd.read_csv(filepath3[:-11]+"events.tsv", sep='\t')['image_file']
 
                 data = file.get_fdata()
-                currData = average(data, 2)
-                for i in range(currData.shape[1]):
-                    results.append(model.predict(currData[:,i]).tolist())
-                    featureList.append(features[keys.find[images[i//3]]].tolist())
-                    feature = features[currkey].reshape(features[currkey].shape[0],1)
+                data = average(data, 2)
+
+                result = model.predict(data)
+                print(result.shape)
+                feature = features[currkey].reshape(features[currkey].shape[0],1)
                 print(feature.shape)
+                results.append(result.tolist())
+                featureList.append(feature.tolist())
+                currkey+=1
     
                 #print(data.shape)
         #np.save(writefile, points) #We are constantly getting MemoryErrors, I'm currently trying to look into making things faster through this
