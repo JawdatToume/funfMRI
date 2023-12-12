@@ -6,6 +6,9 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
+import masker
+import regresser
+import labeler
 
 from nilearn import image
 
@@ -35,6 +38,7 @@ def main():
 def loaderAll():
     print("running loaderAll...")
     points = []
+    mask = masker.maskSubject(1, "V1")
 
     for subjectNo in range(1,6):
         points.append([])
@@ -47,9 +51,10 @@ def loaderAll():
                     file = nib.load(filepath3)
 
                     data = file.get_fdata()
+                    data = masker.maskSubjectData(mask, data)
 
                     points[subjectNo-1].append(data)
-                pickle.dump(points, filepath3.replace("\\",""))
+                #pickle.dump(points, filepath3.replace("\\",""))
     
     for subjectNo in range(0,5):
         currSubject = points[subjectNo]
@@ -66,40 +71,58 @@ def loaderAll():
     return points
 
 def loaderSubject(subjectNo):
+    model = regresser.regressor()
+    labels = labeler.labelsToCSV()
+    currkey = 0
+    keys = labels[0]
+    print(keys)
+    features = labels[1]
+    print(features)
     print("running loaderSubject...")
-    reader = open("fMRIFullData-sub-01-ses-imageryTest03-func.pkl", 'rb')
-    points = pickle.load(reader)
+    #reader = open("fMRIFullData-sub-01-ses-imageryTest01-func.pkl", 'rb')
+    points = []#pickle.load(reader)
 
     filepath = os.path.join("fMRIFullData",os.path.join("sub-0" + str(subjectNo)))
-    for dataTypes in os.listdir(filepath)[4:]:
+    for dataTypes in os.listdir(filepath)[1:]:
+        print(dataTypes)
         filepath2 = os.path.join(filepath, os.path.join(dataTypes, "func"))
         writefile = filepath2.replace("\\", "-")
         writefile += '.pkl'
-        writer = open(writefile, 'wb')
         for dataMatrices in os.listdir(filepath2):
+            print(dataMatrices)
             filepath3 = os.path.join(filepath2, dataMatrices)
             if filepath3[-1] == "z":
                 file = nib.load(filepath3)
 
                 data = file.get_fdata()
+                data = average(data, subjectNo)
+
+                model.fit(data, features[currkey])
+                currkey+=1
 
                 points.append(data)
-        pickle.dump(points, writer)
+    
                 #print(data.shape)
         #np.save(writefile, points) #We are constantly getting MemoryErrors, I'm currently trying to look into making things faster through this
 
+    model.save("modelSub1.pkl")
     complete = []
-    for point in points:
-        complete.extend(point.tolist())
-    complete = np.array(complete)
-    norm_mean = np.mean(complete)
-    norm_std = np.std(complete)
-
-    for point in range(len(points)):
-        points[point] = (points[point] - norm_mean) / norm_std
     
-    print("done")
-    return points
+
+    # for i in range(len(points)):
+    #     complete.extend(points[i].tolist())
+    #     points[i] = None
+    #     print(i)
+    # complete = np.array(complete)
+    #norm_mean = np.mean(complete)
+    #norm_std = np.std(complete)
+
+    # print("")
+    # for point in range(len(points)):
+    #     points[point] = (points[point] - norm_mean) / norm_std
+    
+    # print("done")
+    return model
 
 def loaderSpecific(subjectNo, dataType, dataNo, testNo):
     print("running loaderSpecific...")
@@ -114,7 +137,7 @@ def loaderSpecific(subjectNo, dataType, dataNo, testNo):
         testType2 = "perception"
     # print(f"{(lambda a: '0'+str(a) if a<10 else str(a))(testNo)}")
     try:
-        filepath = os.path.join(f"./fMRIFullData",os.path.join("sub-0" + str(subjectNo), os.path.join("ses-"+testType+"0"+str(dataNo), os.path.join("func", "sub-0"+str(subjectNo)+"_ses-"+testType+"0"+str(dataNo)+"_task-"+testType2+"_run-"+f"{(lambda a: '0'+str(a) if a<10 else str(a))(testNo)}"+"_bold.nii.gz"))))
+        filepath = os.path.join(f"./fMRIFullData",os.path.join("sub-0" + str(subjectNo), os.path.join("ses-"+testType+"0"+str(dataNo), os.path.join("func", "sub-0"+str(subjectNo)+"_ses-"+testType+"%02i"%(dataNo)+"_task-"+testType2+"_run-"+f"{(lambda a: '0'+str(a) if a<10 else str(a))(testNo)}"+"_bold.nii.gz"))))
         # print(filepath)
         file = nib.load(filepath)
 

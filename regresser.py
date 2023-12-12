@@ -8,8 +8,9 @@ import numpy as np
 import masker
 import torch
 import pickle
+import math
 
-# https://gi    thub.com/KamitaniLab/slir
+# https://github.com/KamitaniLab/slir
 from slir import SparseLinearRegression
 from sklearn.linear_model import LinearRegression
 import h5py
@@ -29,23 +30,46 @@ class regressor:
     def fit(self, flattened_data, feature_vector):
         self.linregs = []
         for i in range(feature_vector.shape[1]):
-            if(len(self.linregs) <= i):
-                self.linregs.append(SparseLinearRegression(n_iter=100))
+            while(len(self.linregs) <= i):
+                self.linregs.append(SparseLinearRegression(n_iter=100, prune_mode=0, prune_threshold=0, minval=0.01, converge_threshold=0.01))
             #print(feature_vector[:,i].shape)
-            self.linregs[i].fit(flattened_data, feature_vector[:,i])
+
+            print(flattened_data.shape)
+            yvalue = feature_vector[:,i].tolist()
+            #print(yvalue.shape)
+            for j in range(len(yvalue)):
+                if math.isnan(yvalue[j]) or math.isinf(yvalue[j]):
+                    yvalue.pop(j)
+                    flattened_data.pop(j)
+            yvalue = np.array(yvalue)
+            try:
+                self.linregs[i].fit(flattened_data, yvalue.T)
+            except:
+                pass
 
     def save(self, path):
         saver = open(path, 'wb')
         pickle.dump(self.linregs, saver)
         saver.close()
     
+    def load(self, path):
+        loader = open(path, 'rb')
+        self.linregs = pickle.load(loader)
+    
     def predict(self, test_data):
         predicted_features = []
+        prediction = []
         for regressor in self.linregs:
-            predicted_features.append(regressor.predict(test_data)[0])
+            test_data = test_data.reshape(test_data.shape[0],1)
+            try:
+                prediction = regressor.predict(test_data.T)
+                predicted_features.append(prediction)
+            except:
+                pass
         predicted_features = np.array(predicted_features)
 
         return predicted_features 
+
 
     def evaluate(self, predicted_features, actual_value):
         correlation = np.corrcoef(actual_value, predicted_features)
